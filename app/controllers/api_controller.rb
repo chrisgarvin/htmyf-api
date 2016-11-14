@@ -1,12 +1,11 @@
 class ApiController < ApplicationController
   def submit_feelings
-    response = params["text"]
     message = Message.first
-    message.update(message: response)
-    # Feeling.create(
-    #   reaction:,
-    #   current:
-    # )
+    message.update(message: params["message"])
+    Feeling.create(
+      reaction: params["reaction"],
+      current: params["current"]
+    )
     render json: { response: "SUCCESS" }
   end
 
@@ -16,6 +15,12 @@ class ApiController < ApplicationController
   end
 
   def stats
-    render json: { response: "SUCCESS" }
+    reactions = {}
+    current = {}
+    Feeling.all.map do |feeling|
+      reactions[feeling.reaction].nil? ? reactions[feeling.reaction] = 1 : reactions[feeling.reaction] += 1
+      current[feeling.current].nil? ? current[feeling.current] = 1 : current[feeling.current] += 1
+    end
+    render json: { response: "SUCCESS", reactions: reactions, current: current }
   end
 end
